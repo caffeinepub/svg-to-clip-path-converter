@@ -1,0 +1,12 @@
+{
+  "frontend/src/App.tsx": "Main application component that sets up ThemeProvider and renders the header, converter section, and footer in a flex layout.",
+  "frontend/src/components/Header.tsx": "Header component displaying the app title, description, and a scissors icon with a sticky navigation bar.",
+  "frontend/src/components/Footer.tsx": "Footer component with copyright notice and caffeine.ai attribution link with a heart icon.",
+  "frontend/src/components/ConverterSection.tsx": "Main converter logic component that manages state for SVG path input, passes svgPath to PreviewSection, and coordinates conversion between input, output, and preview sections with conditional rendering based on input presence.",
+  "frontend/src/components/InputSection.tsx": "Input section with tabbed interface for pasting SVG path data or uploading SVG files, includes error handling and validation.",
+  "frontend/src/components/OutputSection.tsx": "Output section displaying converted clip-path formats (path and polygon) in separate tabs with copy-to-clipboard functionality.",
+  "frontend/src/components/PreviewSection.tsx": "Preview section with tabbed interface for switching between \"Input Preview\" (raw SVG path rendering) and \"Output Preview\" (clip-path applied to image/div), with nested tabs for path/polygon format selection in output mode.",
+  "frontend/src/lib/pathConverter.ts": "Utility functions for converting SVG path data to CSS clip-path formats (path() and polygon()), includes path parsing and coordinate normalization.",
+  "frontend/src/index.css": "Global styles with custom OKLCH color system featuring a vibrant purple-blue gradient theme for both light and dark modes.",
+  "frontend/src/hooks/useQueries.ts": "Empty placeholder file as the app performs all conversions client-side without backend queries."
+}

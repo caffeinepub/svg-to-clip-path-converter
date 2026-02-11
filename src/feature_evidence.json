@@ -1,0 +1,60 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-add-an-svg-input-preview-that-renders-the-user-provided-svg-path-d-attribute-so-users-can-visually-verify-the-input-shape",
+      "featureTitle": "Add an SVG *input preview* that renders the user-provided SVG path (`d` attribute) so users can visually verify the input shape.",
+      "files": [
+        "frontend/src/components/PreviewSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-existing-preview-ui-to-support-previewing-both-the-input-shape-and-the-output-clip-path-result-e-g-via-top-level-tabs-segmented-control-input-preview-and-output-preview",
+      "featureTitle": "Update the existing preview UI to support previewing *both* the input shape and the output clip-path result (e.g., via top-level tabs/segmented control: “Input Preview” and “Output Preview”).",
+      "files": [
+        "frontend/src/components/PreviewSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-plumb-the-raw-svg-path-string-from-convertersection-into-the-preview-component-so-the-preview-can-render-the-input-svg-path-update-previewsection-props-accordingly",
+      "featureTitle": "Plumb the raw SVG path string from `ConverterSection` into the preview component so the preview can render the input SVG path (update `PreviewSection` props accordingly).",
+      "files": [
+        "frontend/src/components/ConverterSection.tsx",
+        "frontend/src/components/PreviewSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

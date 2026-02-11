@@ -1,0 +1,60 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Dual-mode preview for SVG input path and generated clip-path output",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Render a live SVG input-path preview with safe empty/invalid states",
+      "acceptanceCriteria": [
+        "When the user pastes an SVG path or uploads an SVG file, the app shows a visual preview of the input path rendered inside an <svg> element.",
+        "The input preview updates live as the input changes.",
+        "If the input is empty or invalid, the input preview area shows an empty/placeholder state instead of throwing errors."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/PreviewSection.tsx",
+          "operation": "modify",
+          "description": "Add an “Input Preview” mode that renders the raw svgPath in an <svg> (e.g., <path d=...>) with a placeholder state for empty/invalid input; ensure rendering is resilient (no runtime errors) and updates whenever the svgPath prop changes. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Add a top-level control to switch between input preview and output preview while preserving output-format switching",
+      "acceptanceCriteria": [
+        "The preview card provides a clear control to switch between “Input Preview” and “Output Preview”.",
+        "“Output Preview” continues to support switching between path() and polygon() formats as it does today.",
+        "Switching preview modes does not affect the generated output values shown in the Output section."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/PreviewSection.tsx",
+          "operation": "modify",
+          "description": "Refactor the preview card UI to include top-level tabs/segmented control for “Input Preview” vs “Output Preview”, and keep the existing output format toggle (path vs polygon) inside the “Output Preview” tab. Use the shadcn-ui Tabs component to implement the tabbed UI. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Pass raw svgPath from ConverterSection to PreviewSection and update props/types",
+      "acceptanceCriteria": [
+        "`ConverterSection` passes the current `svgPath` state down to `PreviewSection`.",
+        "`PreviewSection` accepts the new prop and uses it only for the input preview rendering.",
+        "TypeScript types compile with no errors after prop changes."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ConverterSection.tsx",
+          "operation": "modify",
+          "description": "Plumb the current svgPath state into PreviewSection via a new prop, and adjust conditional rendering so the preview area can be shown for input-preview scenarios even when converted outputs are empty (e.g., invalid input)."
+        },
+        {
+          "path": "frontend/src/components/PreviewSection.tsx",
+          "operation": "modify",
+          "description": "Update PreviewSectionProps to accept svgPath: string and ensure it is only used for rendering the “Input Preview” tab content (not for output preview). Verify the component's usage instructions before implementing."
+        }
+      ]
+    }
+  ]
+}

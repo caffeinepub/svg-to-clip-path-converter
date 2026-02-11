@@ -1,2 +1,3 @@
-# svg-to-clip-path-converter
-Exported from Caffeine project: Add visual preview for both SVG input and converted clip-path output
+## 
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`

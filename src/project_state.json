@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "SVG path converter tool to convert SVG paths into CSS clip-path outputs with selectable conversion modes and previews.",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-add-an-svg-input-preview-that-renders-the-user-provided-svg-path-d-attribute-so-users-can-visually-verify-the-input-shape",
+      "title": "Add an SVG *input preview* that renders the user-provided SVG path (`d` attribute) so users can visually verify the input shape.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-existing-preview-ui-to-support-previewing-both-the-input-shape-and-the-output-clip-path-result-e-g-via-top-level-tabs-segmented-control-input-preview-and-output-preview",
+      "title": "Update the existing preview UI to support previewing *both* the input shape and the output clip-path result (e.g., via top-level tabs/segmented control: “Input Preview” and “Output Preview”).",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-plumb-the-raw-svg-path-string-from-convertersection-into-the-preview-component-so-the-preview-can-render-the-input-svg-path-update-previewsection-props-accordingly",
+      "title": "Plumb the raw SVG path string from `ConverterSection` into the preview component so the preview can render the input SVG path (update `PreviewSection` props accordingly).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Add conversion options: SVG path → clip-path: path() and SVG path → clip-path: polygon()/shape selectable via UI control.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Add preview for both input (SVG path) and output (generated clip-path) so users can visually compare results.",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Add visual preview for both SVG input and converted clip-path output",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
