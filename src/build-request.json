@@ -1,74 +1,105 @@
 {
   "kind": "build_request",
-  "title": "Add visual preview for both SVG input and converted clip-path output",
-  "priority": "normal",
+  "title": "Make SVG path → clip-path polygon conversion universal and robust for curve commands",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Add an SVG *input preview* that renders the user-provided SVG path (`d` attribute) so users can visually verify the input shape.",
+      "id": "REQ-7",
+      "text": "Fix the SVG path tokenization/parsing used by the polygon converter so it never misreads a command letter (e.g., \"c\") as a numeric token, and correctly handles SVG number formats (negative signs without spaces, decimals, and scientific notation) as well as optional comma/space separators.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-last"
+          "msg-4"
         ],
         "quotes": [
-          "Same i need with preview option for both input and output"
+          "Failed to convert path to polygon: Invalid numeric value \"c\" in q command end x-coordinate",
+          "I need universal convertor"
         ]
       },
       "acceptanceCriteria": [
-        "When the user pastes an SVG path or uploads an SVG file, the app shows a visual preview of the input path rendered inside an <svg> element.",
-        "The input preview updates live as the input changes.",
-        "If the input is empty or invalid, the input preview area shows an empty/placeholder state instead of throwing errors."
+        "Given an SVG path that includes adjacent commands (e.g., ... q ... c ... with no extra spacing), polygon conversion does not throw an error where the invalid token is a command letter (e.g., \"c\").",
+        "The polygon parser correctly tokenizes and parses values like \"-10\", \"-.5\", \"10.5\", and \"1e-3\" within path data.",
+        "The polygon parser correctly handles both comma-separated and space-separated coordinate syntax in the same path string.",
+        "If the input is malformed, the error message remains in English and indicates the command/context that failed parsing."
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Update the existing preview UI to support previewing *both* the input shape and the output clip-path result (e.g., via top-level tabs/segmented control: “Input Preview” and “Output Preview”).",
+      "id": "REQ-8",
+      "text": "Upgrade SVG path → clip-path: polygon() conversion logic to be more universal by supporting additional path commands beyond the current subset, including smooth curves (S/s, T/t) and arcs (A/a), and by flattening curve/arc segments into a polyline approximation (instead of only taking curve endpoints).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-last"
+          "msg-4"
         ],
         "quotes": [
-          "Same i need with preview option for both input and output"
+          "I need universal convertor",
+          "Svg path to clip-path::polygon"
         ]
       },
       "acceptanceCriteria": [
-        "The preview card provides a clear control to switch between “Input Preview” and “Output Preview”.",
-        "“Output Preview” continues to support switching between path() and polygon() formats as it does today.",
-        "Switching preview modes does not affect the generated output values shown in the Output section."
+        "Paths containing C/c and Q/q commands produce polygon output that visually follows the curve (approximated with multiple points) rather than a polygon that only includes the curve end points.",
+        "Paths containing S/s and T/t commands convert without errors and produce polygon output.",
+        "Paths containing A/a commands convert without errors and produce polygon output (via reasonable approximation).",
+        "Polygon conversion still supports existing working behaviors: command repetition, multiple coordinate pairs after a command, implicit lineto after moveto, and Z/z closepath handling."
       ]
     },
     {
-      "id": "REQ-3",
-      "text": "Plumb the raw SVG path string from `ConverterSection` into the preview component so the preview can render the input SVG path (update `PreviewSection` props accordingly).",
+      "id": "REQ-9",
+      "text": "Add a user-facing control to adjust polygon approximation quality (e.g., low/medium/high or a numeric “segments per curve” setting) so users can balance accuracy vs. output length, with a sensible default that works well for common icons/logos.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-last"
+          "msg-4"
         ],
         "quotes": [
-          "Same i need with preview option for both input and output"
+          "I need universal convertor"
         ]
       },
       "acceptanceCriteria": [
-        "`ConverterSection` passes the current `svgPath` state down to `PreviewSection`.",
-        "`PreviewSection` accepts the new prop and uses it only for the input preview rendering.",
-        "TypeScript types compile with no errors after prop changes."
+        "UI exposes a polygon quality control that affects the number of points generated for curves/arcs.",
+        "Changing the quality setting recomputes the polygon output and updates the output preview.",
+        "Default setting produces a polygon output for curved paths that is noticeably closer than endpoint-only conversion, without generating an excessively long polygon string."
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Ensure the converter continues to provide both outputs independently: clip-path: path('...') (a direct wrapper of the SVG path data) and clip-path: polygon(...) (approximated), and ensure failures in polygon conversion do not remove a successful path() output.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Svg path clip-path:shape"
+        ]
+      },
+      "acceptanceCriteria": [
+        "For any valid SVG path string, the clip-path: path() output remains available even if polygon conversion fails.",
+        "For valid curved paths that previously triggered the reported error, polygon conversion succeeds and the Polygon tab is enabled in Output and Preview.",
+        "All user-facing error labels and messages remain in English."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files in frontend immutable paths (e.g., `frontend/src/main.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/hooks/useInternetIdentity.ts(x)`, and anything under `frontend/src/components/ui`).",
-    "Keep the backend as-is; no Motoko/backend changes are required for previews."
+    "Do not modify immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "Keep backend as a single Motoko actor; no backend changes are required for this request."
   ],
   "nonGoals": [
-    "Do not add new conversion algorithms beyond the existing path() and polygon() conversions.",
-    "Do not add third-party rendering libraries; use standard React + SVG/HTML preview rendering.",
-    "Do not change authentication/Internet Identity behavior."
+    "Adding third-party SVG parsing libraries or external services for path parsing/conversion.",
+    "Implementing real-time collaboration, chat, or any backend storage of user inputs."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

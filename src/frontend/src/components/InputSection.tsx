@@ -1,18 +1,28 @@
 import { useState, useRef, ChangeEvent } from 'react';
-import { Upload, FileText, AlertCircle } from 'lucide-react';
+import { Upload, FileText, AlertCircle, Settings2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface InputSectionProps {
   onPathChange: (path: string) => void;
-  error: string;
+  onQualityChange: (quality: 'low' | 'medium' | 'high') => void;
+  polygonQuality: 'low' | 'medium' | 'high';
+  pathError: string;
+  polygonError: string;
 }
 
-export default function InputSection({ onPathChange, error }: InputSectionProps) {
+export default function InputSection({ 
+  onPathChange, 
+  onQualityChange,
+  polygonQuality,
+  pathError, 
+  polygonError 
+}: InputSectionProps) {
   const [inputValue, setInputValue] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +76,8 @@ export default function InputSection({ onPathChange, error }: InputSectionProps)
     fileInputRef.current?.click();
   };
 
+  const hasErrors = pathError || polygonError;
+
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -95,7 +107,7 @@ export default function InputSection({ onPathChange, error }: InputSectionProps)
                 className="font-mono text-sm min-h-[150px] resize-y"
               />
               <p className="text-xs text-muted-foreground">
-                Enter SVG path commands (M, L, C, Q, Z, etc.)
+                Supports all SVG path commands (M, L, H, V, C, S, Q, T, A, Z)
               </p>
             </div>
           </TabsContent>
@@ -130,11 +142,48 @@ export default function InputSection({ onPathChange, error }: InputSectionProps)
           </TabsContent>
         </Tabs>
 
-        {error && (
-          <Alert variant="destructive" className="mt-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+        {/* Polygon Quality Control */}
+        <div className="mt-6 p-4 bg-muted/30 rounded-lg space-y-3">
+          <div className="flex items-center gap-2">
+            <Settings2 className="w-4 h-4 text-muted-foreground" />
+            <Label htmlFor="quality-select" className="text-sm font-medium">
+              Polygon Approximation Quality
+            </Label>
+          </div>
+          <Select value={polygonQuality} onValueChange={(v) => onQualityChange(v as 'low' | 'medium' | 'high')}>
+            <SelectTrigger id="quality-select" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">Low (Faster, fewer points)</SelectItem>
+              <SelectItem value="medium">Medium (Balanced)</SelectItem>
+              <SelectItem value="high">High (Smoother, more points)</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Controls how curves and arcs are approximated in polygon format. Higher quality produces smoother results but longer output.
+          </p>
+        </div>
+
+        {hasErrors && (
+          <div className="mt-4 space-y-2">
+            {pathError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Path Format:</strong> {pathError}
+                </AlertDescription>
+              </Alert>
+            )}
+            {polygonError && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Polygon Format:</strong> {polygonError}
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>

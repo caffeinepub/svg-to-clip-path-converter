@@ -1,58 +1,96 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Dual-mode preview for SVG input path and generated clip-path output",
+  "title": "Universal, robust SVG path → clip-path polygon conversion with curve/arc flattening and quality control",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Render a live SVG input-path preview with safe empty/invalid states",
+      "id": "REQ-7",
+      "summary": "Replace path tokenization/parsing so command letters are never misread as numbers and SVG number/separator formats are handled robustly with clear English errors.",
       "acceptanceCriteria": [
-        "When the user pastes an SVG path or uploads an SVG file, the app shows a visual preview of the input path rendered inside an <svg> element.",
-        "The input preview updates live as the input changes.",
-        "If the input is empty or invalid, the input preview area shows an empty/placeholder state instead of throwing errors."
+        "Given an SVG path that includes adjacent commands (e.g., ... q ... c ... with no extra spacing), polygon conversion does not throw an error where the invalid token is a command letter (e.g., \"c\").",
+        "The polygon parser correctly tokenizes and parses values like \"-10\", \"-.5\", \"10.5\", and \"1e-3\" within path data.",
+        "The polygon parser correctly handles both comma-separated and space-separated coordinate syntax in the same path string.",
+        "If the input is malformed, the error message remains in English and indicates the command/context that failed parsing."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/PreviewSection.tsx",
+          "path": "frontend/src/lib/pathConverter.ts",
           "operation": "modify",
-          "description": "Add an “Input Preview” mode that renders the raw svgPath in an <svg> (e.g., <path d=...>) with a placeholder state for empty/invalid input; ensure rendering is resilient (no runtime errors) and updates whenever the svgPath prop changes. Verify the component's usage instructions before implementing."
+          "description": "Rewrite SVG path tokenization to a spec-aligned scanner that emits command tokens and numeric tokens (supporting optional commas/spaces, sign-without-space, decimals, and scientific notation). Replace parseFloat-based numeric parsing with strict full-token validation and context-rich English error messages that include the failing command and parameter index/name."
         }
       ]
     },
     {
-      "id": "REQ-2",
-      "summary": "Add a top-level control to switch between input preview and output preview while preserving output-format switching",
+      "id": "REQ-8",
+      "summary": "Make polygon conversion universal by supporting S/s, T/t, A/a and flattening curves/arcs into polyline approximations (not just endpoints) while preserving existing command behaviors.",
       "acceptanceCriteria": [
-        "The preview card provides a clear control to switch between “Input Preview” and “Output Preview”.",
-        "“Output Preview” continues to support switching between path() and polygon() formats as it does today.",
-        "Switching preview modes does not affect the generated output values shown in the Output section."
+        "Paths containing C/c and Q/q commands produce polygon output that visually follows the curve (approximated with multiple points) rather than a polygon that only includes the curve end points.",
+        "Paths containing S/s and T/t commands convert without errors and produce polygon output.",
+        "Paths containing A/a commands convert without errors and produce polygon output (via reasonable approximation).",
+        "Polygon conversion still supports existing working behaviors: command repetition, multiple coordinate pairs after a command, implicit lineto after moveto, and Z/z closepath handling."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/PreviewSection.tsx",
+          "path": "frontend/src/lib/pathConverter.ts",
           "operation": "modify",
-          "description": "Refactor the preview card UI to include top-level tabs/segmented control for “Input Preview” vs “Output Preview”, and keep the existing output format toggle (path vs polygon) inside the “Output Preview” tab. Use the shadcn-ui Tabs component to implement the tabbed UI. Verify the component's usage instructions before implementing."
+          "description": "Upgrade polygon conversion to a real path interpreter that tracks current point, subpath start, and prior control points; implement support for M/m, L/l, H/h, V/v, C/c, S/s, Q/q, T/t, A/a, Z/z including command repetition and implicit lineto after moveto. Add curve flattening (cubic/quadratic sampling) and arc approximation (sampled points along the arc) to generate polyline points that follow the geometry rather than only segment endpoints."
+        },
+        {
+          "path": "frontend/src/lib/pathConverter.ts",
+          "operation": "modify",
+          "description": "Keep normalization to percentage coordinates, but compute bounds from all generated polyline points (including intermediate curve/arc samples) so output scales correctly for curved paths."
         }
       ]
     },
     {
-      "id": "REQ-3",
-      "summary": "Pass raw svgPath from ConverterSection to PreviewSection and update props/types",
+      "id": "REQ-9",
+      "summary": "Add a user-facing polygon quality control that adjusts curve/arc approximation density and triggers recomputation of polygon output and preview.",
       "acceptanceCriteria": [
-        "`ConverterSection` passes the current `svgPath` state down to `PreviewSection`.",
-        "`PreviewSection` accepts the new prop and uses it only for the input preview rendering.",
-        "TypeScript types compile with no errors after prop changes."
+        "UI exposes a polygon quality control that affects the number of points generated for curves/arcs.",
+        "Changing the quality setting recomputes the polygon output and updates the output preview.",
+        "Default setting produces a polygon output for curved paths that is noticeably closer than endpoint-only conversion, without generating an excessively long polygon string."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/lib/pathConverter.ts",
+          "operation": "modify",
+          "description": "Extend convertSvgPathToPolygon to accept an optional options argument (e.g., segments per curve/arc and/or a quality preset) that directly controls flattening density with a sensible default tuned for icons/logos."
+        },
+        {
+          "path": "frontend/src/components/ConverterSection.tsx",
+          "operation": "modify",
+          "description": "Add state for polygon approximation quality (e.g., numeric segments per curve with a default), pass it into convertSvgPathToPolygon, and ensure changing the quality triggers recomputation without requiring users to re-paste the path."
+        },
+        {
+          "path": "frontend/src/components/InputSection.tsx",
+          "operation": "modify",
+          "description": "Add a polygon quality control (e.g., select low/medium/high or numeric segments-per-curve) and wire it to ConverterSection via new props (quality value + onQualityChange). Keep labels/messages in English."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Preserve independent path() and polygon() outputs so path() always remains available for valid input even when polygon conversion fails, with English errors and correct tab enablement.",
+      "acceptanceCriteria": [
+        "For any valid SVG path string, the clip-path: path() output remains available even if polygon conversion fails.",
+        "For valid curved paths that previously triggered the reported error, polygon conversion succeeds and the Polygon tab is enabled in Output and Preview.",
+        "All user-facing error labels and messages remain in English."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/ConverterSection.tsx",
           "operation": "modify",
-          "description": "Plumb the current svgPath state into PreviewSection via a new prop, and adjust conditional rendering so the preview area can be shown for input-preview scenarios even when converted outputs are empty (e.g., invalid input)."
+          "description": "Refactor conversion flow so path() conversion is computed and stored independently from polygon conversion (including when quality changes), and polygon errors never clear or disable a successful path() output."
+        },
+        {
+          "path": "frontend/src/components/OutputSection.tsx",
+          "operation": "modify",
+          "description": "Ensure tab default/disabled logic continues to reflect availability independently (path tab enabled when path output exists even if polygon fails), and keep all user-facing error text in English."
         },
         {
           "path": "frontend/src/components/PreviewSection.tsx",
           "operation": "modify",
-          "description": "Update PreviewSectionProps to accept svgPath: string and ensure it is only used for rendering the “Input Preview” tab content (not for output preview). Verify the component's usage instructions before implementing."
+          "description": "Ensure Output Preview mode and format tabs stay enabled/disabled based on independent availability, and polygon preview failures do not impact the path preview when path output exists."
         }
       ]
     }

@@ -1,24 +1,30 @@
 import { useState } from 'react';
-import { Eye, Image as ImageIcon } from 'lucide-react';
+import { Eye, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface PreviewSectionProps {
   svgPath: string;
   clipPathPath: string;
   clipPathPolygon: string;
+  pathError: string;
+  polygonError: string;
 }
 
-export default function PreviewSection({ svgPath, clipPathPath, clipPathPolygon }: PreviewSectionProps) {
+export default function PreviewSection({ svgPath, clipPathPath, clipPathPolygon, pathError, polygonError }: PreviewSectionProps) {
   const [previewMode, setPreviewMode] = useState<'input' | 'output'>('input');
   const [outputFormat, setOutputFormat] = useState<'path' | 'polygon'>('path');
 
   const getClipPathStyle = (format: 'path' | 'polygon') => {
     const value = format === 'path' ? clipPathPath : clipPathPolygon;
+    if (!value) return '';
     return value.replace('clip-path: ', '').replace(';', '');
   };
 
-  const hasOutput = !!(clipPathPath || clipPathPolygon);
+  const hasPathOutput = !!clipPathPath;
+  const hasPolygonOutput = !!clipPathPolygon;
+  const hasAnyOutput = hasPathOutput || hasPolygonOutput;
 
   return (
     <Card className="shadow-lg">
@@ -35,7 +41,7 @@ export default function PreviewSection({ svgPath, clipPathPath, clipPathPolygon 
         <Tabs value={previewMode} onValueChange={(v) => setPreviewMode(v as 'input' | 'output')} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="input">Input Preview</TabsTrigger>
-            <TabsTrigger value="output" disabled={!hasOutput}>Output Preview</TabsTrigger>
+            <TabsTrigger value="output" disabled={!hasAnyOutput}>Output Preview</TabsTrigger>
           </TabsList>
           
           <TabsContent value="input" className="space-y-4">
@@ -43,20 +49,42 @@ export default function PreviewSection({ svgPath, clipPathPath, clipPathPolygon 
           </TabsContent>
           
           <TabsContent value="output" className="space-y-4">
-            {hasOutput && (
+            {hasAnyOutput && (
               <>
                 <Tabs value={outputFormat} onValueChange={(v) => setOutputFormat(v as 'path' | 'polygon')} className="w-full">
                   <TabsList className="grid w-full grid-cols-2 mb-4">
-                    <TabsTrigger value="path">Path Format</TabsTrigger>
-                    <TabsTrigger value="polygon">Polygon Format</TabsTrigger>
+                    <TabsTrigger value="path" disabled={!hasPathOutput}>
+                      Path Format
+                    </TabsTrigger>
+                    <TabsTrigger value="polygon" disabled={!hasPolygonOutput}>
+                      Polygon Format
+                    </TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="path" className="space-y-4">
-                    <OutputPreview clipPath={getClipPathStyle('path')} />
+                    {hasPathOutput ? (
+                      <OutputPreview clipPath={getClipPathStyle('path')} />
+                    ) : (
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          Path format preview is unavailable. {pathError || 'Conversion failed.'}
+                        </AlertDescription>
+                      </Alert>
+                    )}
                   </TabsContent>
                   
                   <TabsContent value="polygon" className="space-y-4">
-                    <OutputPreview clipPath={getClipPathStyle('polygon')} />
+                    {hasPolygonOutput ? (
+                      <OutputPreview clipPath={getClipPathStyle('polygon')} />
+                    ) : (
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          Polygon format preview is unavailable. {polygonError || 'Conversion failed.'}
+                        </AlertDescription>
+                      </Alert>
+                    )}
                   </TabsContent>
                 </Tabs>
               </>
@@ -106,6 +134,17 @@ function InputPreview({ svgPath }: { svgPath: string }) {
 }
 
 function OutputPreview({ clipPath }: { clipPath: string }) {
+  // Guard against empty or invalid clip-path
+  if (!clipPath || clipPath.trim() === '') {
+    return (
+      <div className="relative bg-muted/30 rounded-lg p-8 min-h-[300px] flex items-center justify-center">
+        <p className="text-sm text-muted-foreground text-center">
+          No preview available
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Image Preview */}

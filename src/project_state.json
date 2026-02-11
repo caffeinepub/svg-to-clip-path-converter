@@ -1,10 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
+  "projectStateVersion": 7,
   "summary": "SVG path converter tool to convert SVG paths into CSS clip-path outputs with selectable conversion modes and previews.",
   "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Polygon conversion mode output is not working (user reports polygon format produces no/incorrect result).",
+    "Polygon conversion fails on some SVG paths with curve commands (e.g., q/c): error \"Invalid numeric value 'c' in q command end x-coordinate\"."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-add-an-svg-input-preview-that-renders-the-user-provided-svg-path-d-attribute-so-users-can-visually-verify-the-input-shape",
@@ -29,6 +32,62 @@
         "REQ-3"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-fix-the-svg-path-clip-path-polygon-conversion-so-it-correctly-extracts-polygon-points-from-common-svg-path-strings-including-command-repetition-multiple-coordinate-pairs-after-a-single-command-implicit-line-commands-after-an-initial-moveto-and-paths-that-include-z-z-to-close-the-shape",
+      "title": "Fix the SVG path → clip-path: polygon() conversion so it correctly extracts polygon points from common SVG path strings, including command repetition (multiple coordinate pairs after a single command), implicit line commands after an initial moveto, and paths that include Z/z to close the shape.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-conversion-flow-so-a-failure-in-polygon-conversion-does-not-wipe-out-a-successful-path-conversion-and-vice-versa-show-format-specific-errors-and-keep-whichever-conversion-succeeded-available-in-the-ui",
+      "title": "Update conversion flow so a failure in polygon conversion does not wipe out a successful path() conversion (and vice versa). Show format-specific errors and keep whichever conversion succeeded available in the UI.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-output-and-preview-ui-resilient-when-polygon-output-is-unavailable-disable-hide-the-polygon-tab-when-polygon-conversion-produced-no-output-and-prevent-the-preview-from-attempting-to-apply-an-empty-invalid-clip-path-string",
+      "title": "Make the Output and Preview UI resilient when polygon output is unavailable: disable/hide the Polygon tab when polygon conversion produced no output, and prevent the preview from attempting to apply an empty/invalid clip-path string.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-svg-path-tokenization-parsing-used-by-the-polygon-converter-so-it-never-misreads-a-command-letter-e-g-c-as-a-numeric-token-and-correctly-handles-svg-number-formats-negative-signs-without-spaces-decimals-and-scientific-notation-as-well-as-optional-comma-space-separators",
+      "title": "Fix the SVG path tokenization/parsing used by the polygon converter so it never misreads a command letter (e.g., \"c\") as a numeric token, and correctly handles SVG number formats (negative signs without spaces, decimals, and scientific notation) as well as optional comma/space separators.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-upgrade-svg-path-clip-path-polygon-conversion-logic-to-be-more-universal-by-supporting-additional-path-commands-beyond-the-current-subset-including-smooth-curves-s-s-t-t-and-arcs-a-a-and-by-flattening-curve-arc-segments-into-a-polyline-approximation-instead-of-only-taking-curve-endpoints",
+      "title": "Upgrade SVG path → clip-path: polygon() conversion logic to be more universal by supporting additional path commands beyond the current subset, including smooth curves (S/s, T/t) and arcs (A/a), and by flattening curve/arc segments into a polyline approximation (instead of only taking curve endpoints).",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-user-facing-control-to-adjust-polygon-approximation-quality-e-g-low-medium-high-or-a-numeric-segments-per-curve-setting-so-users-can-balance-accuracy-vs-output-length-with-a-sensible-default-that-works-well-for-common-icons-logos",
+      "title": "Add a user-facing control to adjust polygon approximation quality (e.g., low/medium/high or a numeric “segments per curve” setting) so users can balance accuracy vs. output length, with a sensible default that works well for common icons/logos.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-converter-continues-to-provide-both-outputs-independently-clip-path-path-a-direct-wrapper-of-the-svg-path-data-and-clip-path-polygon-approximated-and-ensure-failures-in-polygon-conversion-do-not-remove-a-successful-path-output",
+      "title": "Ensure the converter continues to provide both outputs independently: clip-path: path('...') (a direct wrapper of the SVG path data) and clip-path: polygon(...) (approximated), and ensure failures in polygon conversion do not remove a successful path() output.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -41,6 +100,12 @@
     {
       "id": "AR-2",
       "summary": "Add preview for both input (SVG path) and output (generated clip-path) so users can visually compare results.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Improve SVG path → clip-path conversion to be more universal/robust across path commands (e.g., handle quadratic/cubic curves like q/c without invalid numeric parsing) for both polygon() and shape()/path outputs.",
       "reqIds": [],
       "status": "pending"
     }

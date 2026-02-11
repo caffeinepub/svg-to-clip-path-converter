@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-an-svg-input-preview-that-renders-the-user-provided-svg-path-d-attribute-so-users-can-visually-verify-the-input-shape",
-      "featureTitle": "Add an SVG *input preview* that renders the user-provided SVG path (`d` attribute) so users can visually verify the input shape.",
+      "featureId": "feature-fix-the-svg-path-tokenization-parsing-used-by-the-polygon-converter-so-it-never-misreads-a-command-letter-e-g-c-as-a-numeric-token-and-correctly-handles-svg-number-formats-negative-signs-without-spaces-decimals-and-scientific-notation-as-well-as-optional-comma-space-separators",
+      "featureTitle": "Fix the SVG path tokenization/parsing used by the polygon converter so it never misreads a command letter (e.g., \"c\") as a numeric token, and correctly handles SVG number formats (negative signs without spaces, decimals, and scientific notation) as well as optional comma/space separators.",
       "files": [
-        "frontend/src/components/PreviewSection.tsx"
+        "frontend/src/lib/pathConverter.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -15,15 +15,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-7"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-existing-preview-ui-to-support-previewing-both-the-input-shape-and-the-output-clip-path-result-e-g-via-top-level-tabs-segmented-control-input-preview-and-output-preview",
-      "featureTitle": "Update the existing preview UI to support previewing *both* the input shape and the output clip-path result (e.g., via top-level tabs/segmented control: “Input Preview” and “Output Preview”).",
+      "featureId": "feature-upgrade-svg-path-clip-path-polygon-conversion-logic-to-be-more-universal-by-supporting-additional-path-commands-beyond-the-current-subset-including-smooth-curves-s-s-t-t-and-arcs-a-a-and-by-flattening-curve-arc-segments-into-a-polyline-approximation-instead-of-only-taking-curve-endpoints",
+      "featureTitle": "Upgrade SVG path → clip-path: polygon() conversion logic to be more universal by supporting additional path commands beyond the current subset, including smooth curves (S/s, T/t) and arcs (A/a), and by flattening curve/arc segments into a polyline approximation (instead of only taking curve endpoints).",
       "files": [
-        "frontend/src/components/PreviewSection.tsx"
+        "frontend/src/lib/pathConverter.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -33,16 +33,17 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-2"
+        "REQ-8"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-plumb-the-raw-svg-path-string-from-convertersection-into-the-preview-component-so-the-preview-can-render-the-input-svg-path-update-previewsection-props-accordingly",
-      "featureTitle": "Plumb the raw SVG path string from `ConverterSection` into the preview component so the preview can render the input SVG path (update `PreviewSection` props accordingly).",
+      "featureId": "feature-add-a-user-facing-control-to-adjust-polygon-approximation-quality-e-g-low-medium-high-or-a-numeric-segments-per-curve-setting-so-users-can-balance-accuracy-vs-output-length-with-a-sensible-default-that-works-well-for-common-icons-logos",
+      "featureTitle": "Add a user-facing control to adjust polygon approximation quality (e.g., low/medium/high or a numeric “segments per curve” setting) so users can balance accuracy vs. output length, with a sensible default that works well for common icons/logos.",
       "files": [
         "frontend/src/components/ConverterSection.tsx",
-        "frontend/src/components/PreviewSection.tsx"
+        "frontend/src/components/InputSection.tsx",
+        "frontend/src/lib/pathConverter.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -52,7 +53,25 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-3"
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-converter-continues-to-provide-both-outputs-independently-clip-path-path-a-direct-wrapper-of-the-svg-path-data-and-clip-path-polygon-approximated-and-ensure-failures-in-polygon-conversion-do-not-remove-a-successful-path-output",
+      "featureTitle": "Ensure the converter continues to provide both outputs independently: clip-path: path('...') (a direct wrapper of the SVG path data) and clip-path: polygon(...) (approximated), and ensure failures in polygon conversion do not remove a successful path() output.",
+      "files": [
+        "frontend/src/components/ConverterSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
       ],
       "confidence": "high"
     }
